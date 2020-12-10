@@ -6,7 +6,7 @@ ENVIRONMENT    ?=web
 INITIAL_MEMORY ?=1gb
 PRELOAD_ASSETS ?=/src/preload/
 ASSERTIONS     ?=0
-OPTIMIZE       ?=-O1
+OPTIMIZE       ?=-O2
 RELEASE_SUFFIX ?=
 
 PHP_BRANCH     ?=php-8.0.0
@@ -118,7 +118,7 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc ${OPTIMIZE} \
 	-o ../../build/php-${ENVIRONMENT}${RELEASE_SUFFIX}.js \
 	--llvm-lto 2                     \
 	-s EXPORTED_FUNCTIONS='["_pib_init", "_pib_destroy", "_pib_run", "_pib_exec", "_pib_refresh", "_main", "_php_embed_init", "_php_embed_shutdown", "_php_embed_shutdown", "_zend_eval_string"]' \
-	-s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "UTF8ToString", "lengthBytesUTF8"]' \
+	-s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "UTF8ToString", "lengthBytesUTF8", "FS"]' \
 	-s ENVIRONMENT=${ENVIRONMENT}    \
 	-s FORCE_FILESYSTEM=1            \
 	-s MAXIMUM_MEMORY=2gb             \
@@ -126,7 +126,6 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc ${OPTIMIZE} \
 	-s ALLOW_MEMORY_GROWTH=1         \
 	-s ASSERTIONS=${ASSERTIONS}      \
 	-s ERROR_ON_UNDEFINED_SYMBOLS=0  \
-	-s EXPORT_NAME="'PHP'"           \
 	-s MODULARIZE=1                  \
 	-s INVOKE_RUN=0                  \
 	-lidbfs.js                       \

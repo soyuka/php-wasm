@@ -1,9 +1,7 @@
-FROM emscripten/emsdk:2.0.6
+FROM emscripten/emsdk:2.0.10
 MAINTAINER Sean Morris <sean@seanmorr.is>
 
 SHELL ["/bin/bash", "-c"]
-
-ARG PHP_BRANCH=PHP-7.4
 
 RUN apt-get update && \
 	apt-get --no-install-recommends -y install \
@@ -21,5 +19,5 @@ RUN apt-get update && \
 		git \
     libxml2 \
     libxml2-dev \
-		pv && \
-	emsdk install latest
+		pv \
+    re2c
