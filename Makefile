@@ -9,17 +9,12 @@ ASSERTIONS     ?=0
 OPTIMIZE       ?=-O1
 RELEASE_SUFFIX ?=
 
-PHP_BRANCH     ?=PHP-7.4
-ICU_TAG        ?=release-67-1
+PHP_BRANCH     ?=php-8.0.0
 LIBXML2_TAG    ?=v2.9.10
-TIDYHTML_TAG   ?=5.6.0
-
-PKG_CONFIG_PATH ?=/src/lib/lib/pkgconfig
 
 DOCKER_ENV=docker-compose -p phpwasm run --rm \
 	-e UID=${UID} \
 	-e INITIAL_MEMORY=${INITIAL_MEMORY}   \
-  -e PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
 	-e LIBXML_LIBS="-L/src/lib/lib" \
 	-e LIBXML_CFLAGS="-I/src/lib/include/libxml2" \
 	-e SQLITE_CFLAGS="-I/src/third_party/sqlite-src" \
@@ -52,7 +47,7 @@ third_party/php-src/patched: third_party/sqlite-src/sqlite3.c
 		--depth 1
 	${DOCKER_RUN} cp -v third_party/sqlite-src/sqlite3.h third_party/php-src/main/sqlite3.h
 	${DOCKER_RUN} cp -v third_party/sqlite-src/sqlite3.c third_party/php-src/main/sqlite3.c
-	${DOCKER_RUN} git apply --directory=third_party/php-src --no-index patch/php7.4.patch
+	${DOCKER_RUN} git apply --directory=third_party/php-src --no-index patch/${PHP_BRANCH}.patch
 	${DOCKER_RUN} touch third_party/php-src/patched
 
 third_party/libxml2/README:
@@ -98,14 +93,13 @@ third_party/php-src/configure: third_party/php-src/patched third_party/libxml2/c
 		--disable-mbregex  \
 		--enable-tokenizer \
 		--enable-simplexml   \
-		PKG_CONFIG_PATH=/src/lib/lib/pkgconfig \
 	"
 
-lib/libphp7.a: third_party/php-src/configure third_party/php-src/patched third_party/sqlite-src/sqlite3.c
+lib/libphp.a: third_party/php-src/configure third_party/php-src/patched third_party/sqlite-src/sqlite3.c
 	${DOCKER_RUN_IN_PHP} emmake make -j6
-	${DOCKER_RUN} cp -v third_party/php-src/.libs/libphp7.la third_party/php-src/.libs/libphp7.a lib/
+	${DOCKER_RUN} cp -v third_party/php-src/.libs/libphp.la third_party/php-src/.libs/libphp.a lib/
 
-lib/pib_eval.o: lib/libphp7.a source/pib_eval.c
+lib/pib_eval.o: lib/libphp.a source/pib_eval.c
 	${DOCKER_RUN_IN_PHP} emcc ${OPTIMIZE} \
 		-I .     \
 		-I Zend  \
@@ -135,26 +129,27 @@ FINAL_BUILD=${DOCKER_RUN_IN_PHP} emcc ${OPTIMIZE} \
 	-s EXPORT_NAME="'PHP'"           \
 	-s MODULARIZE=1                  \
 	-s INVOKE_RUN=0                  \
-		/src/lib/pib_eval.o /src/lib/libphp7.a /src/lib/lib/libxml2.a
+	-lidbfs.js                       \
+		/src/lib/pib_eval.o /src/lib/libphp.a /src/lib/lib/libxml2.a
 
 php-web.wasm: ENVIRONMENT=web
-php-web.wasm: lib/libphp7.a lib/pib_eval.o 
+php-web.wasm: lib/libphp.a lib/pib_eval.o 
 	${FINAL_BUILD}
 
 php-worker.wasm: ENVIRONMENT=worker
-php-worker.wasm: lib/libphp7.a lib/pib_eval.o
+php-worker.wasm: lib/libphp.a lib/pib_eval.o
 	${FINAL_BUILD}
 
 php-node.wasm: ENVIRONMENT=node
-php-node.wasm: lib/libphp7.a lib/pib_eval.o
+php-node.wasm: lib/libphp.a lib/pib_eval.o
 	${FINAL_BUILD}
 
 php-shell.wasm: ENVIRONMENT=shell
-php-shell.wasm: lib/libphp7.a lib/pib_eval.o
+php-shell.wasm: lib/libphp.a lib/pib_eval.o
 	${FINAL_BUILD}
 
 php-webview.wasm: ENVIRONMENT=webview
-php-webview.wasm: lib/libphp7.a lib/pib_eval.o
+php-webview.wasm: lib/libphp.a lib/pib_eval.o
 	${FINAL_BUILD}
 
 ########### Clerical stuff. ###########
