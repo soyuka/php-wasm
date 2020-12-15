@@ -1,12 +1,1 @@
-/php*.js
-/php*.wasm
-/php*.wat
-/php*.wasm.map
-/php*.data
-/Php*.js
-/*.js
-/node_modules
-configured
-.env
-/*-src/
-/preload/*
+build
