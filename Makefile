@@ -33,6 +33,7 @@ all: lib/pib_eval.o php-web.wasm
 ########### Collect & patch the source code. ###########
 
 third_party/sqlite-src/sqlite3.c:
+	mkdir -p third_party
 	wget https://sqlite.org/2020/sqlite-amalgamation-3330000.zip
 	${DOCKER_RUN} unzip sqlite-amalgamation-3330000.zip
 	${DOCKER_RUN} rm sqlite-amalgamation-3330000.zip
