@@ -65,6 +65,7 @@ third_party/libxml2/configure: third_party/libxml2/README
 ########### Build the objects. ###########
 
 third_party/php-src/configure: third_party/php-src/patched third_party/libxml2/configure
+	mkdir -p build
 	${DOCKER_RUN_IN_PHP} bash -c "./buildconf --force && emconfigure ./configure \
 		--enable-embed=static \
 		--with-layout=GNU  \
