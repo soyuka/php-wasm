@@ -3,11 +3,11 @@
 Project based on https://github.com/seanmorris/php-wasm which was forked from https://github.com/oraoto/pib
 
 I fixed some inconsistencies in the Makefile and removed non-essential things. This fork:
-  - does build SQLITE3 (TODO add this back opt-in)
-  - does build Libxml
+  - does build sqlite3
+  - does build libxml
   - has no javascript abstraction
   - does not build https://github.com/seanmorris/vrzno which allows javascript access from PHP (TODO add this back opt-in cause it's really cool)
-  - does not add preloaded data, having this separatly from php-wasm builds allows for more flexibility
+  - does not add preloaded data, having this separatly from php-wasm builds allows for more flexibility (see [preload data section](#preload-data))
   - exposes FS and builds with [IDBFS](https://emscripten.org/docs/api_reference/Filesystem-API.html#FS.syncfs)
   - reduces memory to 256mb
 
@@ -24,7 +24,7 @@ Builded files will be located in `build/php-web.js` and `build/php-web.wasm`.
 
 The builded PHP WASM version exposes these functions that will help you execute PHP: `_pib_init`, `_pib_destroy`, `_pib_run`, `_pib_exec`, `_pib_refresh`. The source code behind them is located under `source/pib_eval.c` and the exported function are declared in the final build command (see `Makefile`). To call these, you'll use [`ccall`](https://emscripten.org/docs/porting/connecting_cpp_and_javascript/Interacting-with-code.html#interacting-with-code-ccall-cwrap), for example:
 
-```
+```javascript
 const phpBinary = require('build/php-web');
 
 return phpBinary({
@@ -50,7 +50,7 @@ return phpBinary({
 
 Thanks to [@seanmorris](https://github.com/seanmorris/php-wasm) you can also use persistent calls to keep things in memory by using:
 
-```
+```javascript
 let retVal = ccall(
   'pib_init'
   , NUM
@@ -88,7 +88,7 @@ You can build preloaded assets (`PRELOAD_ASSETS=/data`) using `make preload-data
 
 This step on API Platform By Examples is done with the following Makefile using the original file as `php-web.ori.js`:
 
-```
+```make
 UID=1000
 API_PLATFORM_DIR=examples
 DOCKER_RUN=docker run --rm -e ENVIRONMENT=web -v $(CURDIR):/src -v $(CURDIR)/../${API_PLATFORM_DIR}:/src/${API_PLATFORM_DIR} -w /src soyuka/php-emscripten-builder:latest 
