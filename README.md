@@ -81,3 +81,26 @@ function refresh() {
 ```
 
 More examples on the code usage are available on [@seanmorris's repository](https://github.com/seanmorris/php-wasm/tree/master/docs-source) or on [APIPlatform By Examples]().
+
+## Preload data
+
+You can build preloaded assets (`PRELOAD_ASSETS=/data`) using `make preload-data`. Then you'll need to add the `php-web.data.js` to the actual `php-web.js` file. 
+
+This step on API Platform By Examples is done with the following Makefile using the original file as `php-web.ori.js`:
+
+```
+UID=1000
+API_PLATFORM_DIR=examples
+DOCKER_RUN=docker run --rm -e ENVIRONMENT=web -v $(CURDIR):/src -v $(CURDIR)/../${API_PLATFORM_DIR}:/src/${API_PLATFORM_DIR} -w /src soyuka/php-emscripten-builder:latest 
+
+preload:
+	${DOCKER_RUN} python3 /emsdk/upstream/emscripten/tools/file_packager.py ./public/php-web.data --preload "/src/${API_PLATFORM_DIR}" --js-output=./php-wasm/php-web.data.js
+	${DOCKER_RUN} chown ${UID} ./php-wasm/php-web.data.js
+	sed -e '/function(Module) {/r./php-wasm/php-web.data.js' php-wasm/php-web.ori.js > php-wasm/php-web.js
+	rmdir ${API_PLATFORM_DIR}
+```
+
+## TODO
+
+- cache libxml and sqlite to speed up builds
+- add opt-in / opt-out sqlite libxml vrzno and mb more
