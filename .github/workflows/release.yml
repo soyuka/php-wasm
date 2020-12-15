@@ -8,14 +8,17 @@ jobs:
   release:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
+      - name: Download artifact
+        uses: dawidd6/action-download-artifact@v2
         with:
+          github_token: ${{secrets.GITHUB_TOKEN}}
           name: PHP-7.4-web.wasm
           path: build
-      - uses: actions/download-artifact@v2
+      - name: Download artifact
+        uses: dawidd6/action-download-artifact@v2
         with:
-          name: PHP-8.0-web.wasm
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          name: PHP-8.0.0-web.wasm
           path: build
       - run: ls -R build
   
