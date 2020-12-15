@@ -58,7 +58,7 @@ third_party/libxml2/configure: third_party/libxml2/README
 	${DOCKER_RUN_IN_LIBXML} ./autogen.sh
 	${DOCKER_RUN_IN_LIBXML} emconfigure ./configure --prefix=/src/lib/ --enable-static --disable-shared \
 		--with-python=no --with-threads=no
-	${DOCKER_RUN_IN_LIBXML} emmake make -j6
+	${DOCKER_RUN_IN_LIBXML} emmake make -j8
 	${DOCKER_RUN_IN_LIBXML} emmake make install
 
 ########### Build the objects. ###########
@@ -94,7 +94,7 @@ third_party/php-src/configure: third_party/php-src/patched third_party/libxml2/c
 	"
 
 lib/libphp.a: third_party/php-src/configure third_party/php-src/patched third_party/sqlite-src/sqlite3.c
-	${DOCKER_RUN_IN_PHP} emmake make -j6
+	${DOCKER_RUN_IN_PHP} emmake make -j8
 	# PHP7 outputs a libphp7 whereas php8 a libphp
 	${DOCKER_RUN_IN_PHP} bash -c '[[ -f .libs/libphp7.la  ]] && mv .libs/libphp7.la .libs/libphp.la && mv .libs/libphp7.a .libs/libphp.a && mv .libs/libphp7.lai .libs/libphp.lai || exit 0'
 	${DOCKER_RUN} cp -v third_party/php-src/.libs/libphp.la third_party/php-src/.libs/libphp.a lib/

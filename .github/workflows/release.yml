@@ -24,8 +24,9 @@ jobs:
           path: build/PHP-8.0.0-web.wasm
       - name: Zip artifacts
         run: |
-          zip -r php-7.4-web.zip build/PHP-7.4-web.wasm
-          zip -r php-8.0.0-web.zip build/PHP-8.0.0-web.wasm
+          cd build
+          zip -r ../php-7.4-web.zip PHP-7.4-web.wasm
+          zip -r ../php-8.0.0-web.zip PHP-8.0.0-web.wasm
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
