@@ -11,6 +11,10 @@ I fixed some inconsistencies in the Makefile and removed non-essential things. T
   - exposes FS and builds with [IDBFS](https://emscripten.org/docs/api_reference/Filesystem-API.html#FS.syncfs)
   - reduces memory to 256mb
 
+## Usage 
+
+Some build
+
 ## Build 
 
 ```
@@ -22,7 +26,7 @@ Builded files will be located in `build/php-web.js` and `build/php-web.wasm`.
 
 ## Usage
 
-The builded PHP WASM version exposes these functions that will help you execute PHP: `_pib_init`, `_pib_destroy`, `_pib_run`, `_pib_exec`, `_pib_refresh`. The source code behind them is located under `source/pib_eval.c` and the exported function are declared in the final build command (see `Makefile`). To call these, you'll use [`ccall`](https://emscripten.org/docs/porting/connecting_cpp_and_javascript/Interacting-with-code.html#interacting-with-code-ccall-cwrap), for example:
+To execute some php, call `pib_exec` using [`ccall`](https://emscripten.org/docs/porting/connecting_cpp_and_javascript/Interacting-with-code.html#interacting-with-code-ccall-cwrap), for example:
 
 ```javascript
 const phpBinary = require('build/php-web');
@@ -47,6 +51,8 @@ return phpBinary({
   );
 })
 ```
+
+The builded PHP WASM version exposes these functions that will help you execute PHP: `_pib_init`, `_pib_destroy`, `_pib_run`, `_pib_exec`, `_pib_refresh`. The source code behind them is located under `source/pib_eval.c` and the exported function are declared in the final build command (see `Makefile`). 
 
 Thanks to [@seanmorris](https://github.com/seanmorris/php-wasm) you can also use persistent calls to keep things in memory by using:
 
