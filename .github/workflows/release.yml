@@ -11,12 +11,14 @@ jobs:
       - name: Download artifact
         uses: dawidd6/action-download-artifact@v2
         with:
+          workflow: build.yml
           github_token: ${{secrets.GITHUB_TOKEN}}
           name: PHP-7.4-web.wasm
           path: build
       - name: Download artifact
         uses: dawidd6/action-download-artifact@v2
         with:
+          workflow: build.yml
           github_token: ${{secrets.GITHUB_TOKEN}}
           name: PHP-8.0.0-web.wasm
           path: build
