@@ -1,12 +1,14 @@
 name: release
-on:
-  push:
-    tags:
-      - 'v*'
+on: [push]
+# on:
+#   push:
+#     tags:
+#       - 'v*'
 jobs:
   release:
     runs-on: "ubuntu-latest"
     steps:
+      - uses: actions/checkout@v2
       - uses: actions/download-artifact@v2
         with:
           name: PHP-7.4-web.wasm
