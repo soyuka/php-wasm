@@ -1,0 +1,26 @@
+name: release
+on:
+  push:
+    tags:
+      - 'v*'
+jobs:
+  release:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: PHP-7.4-web.wasm
+          path: build
+      - uses: actions/download-artifact@v2
+        with:
+          name: PHP-8.0-web.wasm
+          path: build
+      - run: ls -R build
+  
+      # - uses: "marvinpinto/action-automatic-releases@latest"
+      #   with:
+      #     repo_token: "${{ secrets.GITHUB_TOKEN }}"
+      #     prerelease: false
+      #     files: |
+      #       LICENSE.txt
+      #       *.jar

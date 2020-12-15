@@ -1,8 +1,6 @@
 -include .env
 # Please note that this file is under Apache2 License https://github.com/seanmorris/php-wasm)
 
-UID?=1000 # Change this in your .env file if you're not UID 1001
-
 ENVIRONMENT    ?=web
 INITIAL_MEMORY ?=256mb
 PRELOAD_ASSETS ?=/src/preload/
@@ -11,12 +9,11 @@ OPTIMIZE       ?=-O2
 RELEASE_SUFFIX ?=
 
 DOCKER_IMAGE   ?=soyuka/php-emscripten-builder:latest
-PHP_BRANCH     ?=php-8.0.0
+PHP_BRANCH     ?=PHP-8.0.0
 LIBXML2_TAG    ?=v2.9.10
 
 DOCKER_ENV=docker run --rm \
 	-v $(CURDIR):/src \
-	-e UID=${UID} \
 	-e INITIAL_MEMORY=${INITIAL_MEMORY}   \
 	-e LIBXML_LIBS="-L/src/lib/lib" \
 	-e LIBXML_CFLAGS="-I/src/lib/include/libxml2" \
@@ -29,11 +26,9 @@ DOCKER_RUN           =${DOCKER_ENV} ${DOCKER_IMAGE}
 DOCKER_RUN_IN_PHP    =${DOCKER_ENV} -w /src/third_party/php-src/ ${DOCKER_IMAGE}
 DOCKER_RUN_IN_LIBXML =${DOCKER_ENV} -w /src/third_party/libxml2/ ${DOCKER_IMAGE}
 
-.PHONY: web all clean image js hooks push-image pull-image
+.PHONY: clean build pull
 
-web: lib/pib_eval.o php-web.wasm
-all: php-web.wasm php-webview.wasm php-node.wasm php-shell.wasm php-worker.wasm js
-	@ echo "Done!"
+all: lib/pib_eval.o php-web.wasm
 
 ########### Collect & patch the source code. ###########
 
@@ -100,6 +95,8 @@ third_party/php-src/configure: third_party/php-src/patched third_party/libxml2/c
 
 lib/libphp.a: third_party/php-src/configure third_party/php-src/patched third_party/sqlite-src/sqlite3.c
 	${DOCKER_RUN_IN_PHP} emmake make -j6
+	# PHP7 outputs a libphp7 whereas php8 a libphp
+	${DOCKER_RUN_IN_PHP} bash -c '[[ -f .libs/libphp7.la  ]] && mv .libs/libphp7.la .libs/libphp.la && mv .libs/libphp7.a .libs/libphp.a && mv .libs/libphp7.lai .libs/libphp.lai || exit 0'
 	${DOCKER_RUN} cp -v third_party/php-src/.libs/libphp.la third_party/php-src/.libs/libphp.a lib/
 
 lib/pib_eval.o: lib/libphp.a source/pib_eval.c
@@ -165,6 +162,9 @@ clean:
 
 build:
 	docker build . -t ${DOCKER_IMAGE}
+
+pull:
+	docker pull ${DOCKER_IMAGE}
 
 preload-data:
 	${DOCKER_RUN_IN_PHP} python3 /emsdk/upstream/emscripten/tools/file_packager.py ../../build/php-web.data \
