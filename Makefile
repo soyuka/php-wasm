@@ -1,18 +1,21 @@
 -include .env
+# Please note that this file is under Apache2 License https://github.com/seanmorris/php-wasm)
 
 UID?=1000 # Change this in your .env file if you're not UID 1001
 
 ENVIRONMENT    ?=web
-INITIAL_MEMORY ?=1gb
+INITIAL_MEMORY ?=256mb
 PRELOAD_ASSETS ?=/src/preload/
 ASSERTIONS     ?=0
 OPTIMIZE       ?=-O2
 RELEASE_SUFFIX ?=
 
+DOCKER_IMAGE   ?=soyuka/php-emscripten-builder:latest
 PHP_BRANCH     ?=php-8.0.0
 LIBXML2_TAG    ?=v2.9.10
 
-DOCKER_ENV=docker-compose -p phpwasm run --rm \
+DOCKER_ENV=docker run --rm \
+	-v $(CURDIR):/src \
 	-e UID=${UID} \
 	-e INITIAL_MEMORY=${INITIAL_MEMORY}   \
 	-e LIBXML_LIBS="-L/src/lib/lib" \
@@ -22,9 +25,9 @@ DOCKER_ENV=docker-compose -p phpwasm run --rm \
   -e PRELOAD_ASSETS='${PRELOAD_ASSETS}' \
 	-e ENVIRONMENT=${ENVIRONMENT}         
 
-DOCKER_RUN           =${DOCKER_ENV} emscripten-builder
-DOCKER_RUN_IN_PHP    =${DOCKER_ENV} -w /src/third_party/php-src/ emscripten-builder
-DOCKER_RUN_IN_LIBXML =${DOCKER_ENV} -w /src/third_party/libxml2/ emscripten-builder
+DOCKER_RUN           =${DOCKER_ENV} ${DOCKER_IMAGE}
+DOCKER_RUN_IN_PHP    =${DOCKER_ENV} -w /src/third_party/php-src/ ${DOCKER_IMAGE}
+DOCKER_RUN_IN_LIBXML =${DOCKER_ENV} -w /src/third_party/libxml2/ ${DOCKER_IMAGE}
 
 .PHONY: web all clean image js hooks push-image pull-image
 
@@ -160,21 +163,8 @@ clean:
 	${DOCKER_RUN} rm -rfv third_party/libxml2
 	${DOCKER_RUN} rm -rfv third_party/sqlite-src
 
-hooks:
-	@ git config core.hooksPath githooks
-
-js:
-	@ npm install | ${TIMER}
-	@ npx babel source --out-dir . | ${TIMER}
-
-image:
-	@ docker-compose build
-
-pull-image:
-	@ docker-compose pull
-
-push-image:
-	@ docker-compose push
+build:
+	docker build . -t ${DOCKER_IMAGE}
 
 preload-data:
 	${DOCKER_RUN_IN_PHP} python3 /emsdk/upstream/emscripten/tools/file_packager.py ../../build/php-web.data \

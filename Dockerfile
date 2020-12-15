@@ -1,8 +1,4 @@
 FROM emscripten/emsdk:2.0.10
-MAINTAINER Sean Morris <sean@seanmorr.is>
-
-SHELL ["/bin/bash", "-c"]
-
 RUN apt-get update && \
 	apt-get --no-install-recommends -y install \
 		build-essential \
@@ -21,3 +17,5 @@ RUN apt-get update && \
     libxml2-dev \
 		pv \
     re2c
+
+SHELL ["/bin/bash", "-c"]
