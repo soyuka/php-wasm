@@ -12,6 +12,7 @@ jobs:
         with:
           workflow: build.yml
           branch: main
+          workflow_conclusion: success
           github_token: ${{secrets.GITHUB_TOKEN}}
           name: PHP-7.4-web.wasm
           path: build/PHP-7.4-web.wasm
